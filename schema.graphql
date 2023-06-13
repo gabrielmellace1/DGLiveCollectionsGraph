@@ -1,0 +1,31 @@
+type User @entity {
+  id: ID! # This will store the user's wallet address
+  ownedNFTs: [NFT!]! @derivedFrom(field: "owner")
+  ownedNFTAddresses: [NFTAddress!]! @derivedFrom(field: "owner")
+}
+
+type NFTAddress @entity {
+  id: ID! # This will store the NFT contract address
+  owner: User! # The owner of the NFT contract
+  NFTs: [NFT!]! @derivedFrom(field: "nftAddress")
+  collectionType: String! # Type of collection, e.g., art, music
+  collectionName: String! # Name of the collection
+  collectionSymbol: String! # Symbol of the collection
+  createdAt: BigInt!
+}
+
+type NFT @entity {
+  id: ID! # This will store a unique identifier for the NFT, for example, contractAddress-tokenId
+  nftAddress: NFTAddress!
+  owner: User!
+  tokenURI: String
+  transferEvents: [TransferEvent!]! @derivedFrom(field: "nft")
+}
+
+type TransferEvent @entity {
+  id: ID! # A unique identifier for each transfer event
+  nft: NFT!
+  from: User
+  to: User!
+  timestamp: BigInt!
+}

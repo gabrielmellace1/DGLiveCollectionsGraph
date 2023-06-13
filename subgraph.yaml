@@ -1,0 +1,51 @@
+specVersion: 0.0.4
+description: A Subgraph to track NFTs and their Transfer Events
+repository: https://github.com/gabrielmellace1/DGLiveCollectionsGraph
+schema:
+  file: ./schema.graphql
+
+dataSources:
+  - name: DGLiveNFTFactory
+    kind: ethereum/contract
+    network: "matic"
+    source:
+      address: "0x9e0134C9386d0B01835E40900F546b3998907F24" # Address of the DGLiveNFTFactory contract
+      abi: DGLiveNFTFactory
+      startBlock: 1234567
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - NFTAddress
+        - User
+      abis:
+        - name: DGLiveNFTFactory
+          file: ./abis/DGLiveNFTFactory.json
+      eventHandlers:
+        - event: NewERC721Contract(address,address,string,string,string)
+          handler: handleNewERC721Contract
+      file: ./src/mapping.ts
+
+templates:
+  - name: NFTCollectionTemplate
+    kind: ethereum/contract
+    network: "matic"
+    source:
+      abi: DGLiveNFT
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - NFT
+        - TransferEvent
+      abis:
+        - name: DGLiveNFT
+          file: ./abis/DGLiveNFT.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+        - event: OwnershipTransferred(address,address)
+          handler: handleOwnershipTransferred
+      file: ./src/mapping.ts
